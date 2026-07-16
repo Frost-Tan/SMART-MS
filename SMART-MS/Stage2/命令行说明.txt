@@ -1,0 +1,105 @@
+================================================================================
+  Stage2 Cascaded Model Training (Default: Strategy 3 Full Pipeline) — Command Line Instructions (Windows)
+================================================================================
+
+[Path Conventions]
+  · The dataset defaults to the relative path from the repository root: dataset\FINAL_task2_neg.csv
+  · All relative paths in command line arguments are relative to the "repository root directory"
+    (the level containing both dataset and SMART-MS folders), independent of drive letters
+    or local absolute paths.
+  · By default, a subfolder output\ is automatically created under the code directory (SMART-MS\Stage2\),
+    and all reports, images, and models are written into strategy-specific subdirectories.
+    Only when using the --all-ablations parameter, additional cross-strategy comparison files
+    are generated at the root of the output directory.
+
+[Default Behavior]
+  · Without any ablation flag, only "Strategy3_Full_Pipeline" (full cascade + total sugar constrained decoding)
+    is trained. Results are located at:
+      SMART-MS\Stage2\output\Strategy3_Full_Pipeline\
+
+[Three Ablation Strategies]
+  · When the --all-ablations flag is added, strategies 1, 2, and 3 are trained sequentially.
+    Each strategy's results are located in:
+      SMART-MS\Stage2\output\Strategy1_Independent\
+      SMART-MS\Stage2\output\Strategy2_Cascaded_NoConstraint\
+      SMART-MS\Stage2\output\Strategy3_Full_Pipeline\
+    Additionally, the following files are generated at the output root:
+      ablation_comparison_metrics.csv
+      ablation_performance_bar.png
+      ablation_overall_report.txt
+
+[Environment]
+  pip install pandas numpy lightgbm scikit-learn matplotlib seaborn joblib tqdm
+
+[Working Directory] Open a terminal at the repository root (you should see the dataset and SMART-MS folders).
+
+--------------------------------------------------------------------------------
+1) Default Run (only Strategy 3; data: dataset\FINAL_task2_neg.csv; output in Stage2\output\)
+--------------------------------------------------------------------------------
+
+  CMD:
+
+    cd /d <repo_root>
+    python SMART-MS\Stage2\main.py
+
+  PowerShell:
+
+    Set-Location <repo_root>
+    python SMART-MS\Stage2\main.py
+
+  Replace <repo_root> with your actual project root path.
+
+--------------------------------------------------------------------------------
+2) Explicitly Specify Data File (still a relative path from the repository root)
+--------------------------------------------------------------------------------
+
+  python SMART-MS\Stage2\main.py --data dataset\FINAL_task2_neg.csv
+
+--------------------------------------------------------------------------------
+3) Three Ablation Experiments (Strategies 1 + 2 + 3)
+--------------------------------------------------------------------------------
+
+  python SMART-MS\Stage2\main.py --all-ablations
+
+  Example with custom data and output directory:
+
+    python SMART-MS\Stage2\main.py ^
+      --all-ablations ^
+      --data dataset\FINAL_task2_neg.csv ^
+      --output-dir SMART-MS\Stage2\output
+
+--------------------------------------------------------------------------------
+4) Explicitly Specify Output Root Directory (relative to repo root)
+--------------------------------------------------------------------------------
+
+  python SMART-MS\Stage2\main.py --output-dir SMART-MS\Stage2\output
+
+  Note: Each strategy's specific files are still written to the Strategy*_ subdirectories under this directory.
+
+--------------------------------------------------------------------------------
+5) Optional Parameters
+--------------------------------------------------------------------------------
+
+  --outer-folds N    Number of outer StratifiedKFold folds (default: 10)
+  --inner-folds N    Number of inner cross_val_predict folds (default: 10)
+  --seed N           Random seed (default: 42)
+  --device cpu|gpu   LightGBM device (default: cpu; specify gpu if GPU is available and supported)
+
+  Example (GPU):
+
+    python SMART-MS\Stage2\main.py --device gpu
+
+--------------------------------------------------------------------------------
+[Default Generated Files (when running Strategy 3 alone, under …\output\Strategy3_Full_Pipeline\)]
+--------------------------------------------------------------------------------
+
+  - plot_confusion_matrix_type.png
+  - plot_overall_metrics.png
+  - model_performance_report.txt
+  - cv_prediction_detailed.csv
+  - cv_metrics_summary.csv
+  - le_type.joblib
+  - model_type_fold*.joblib, model_total_sugar_fold*.joblib, model_site_*_fold*.joblib
+  - Strategy 3 additionally includes: feature_importance_stage*.png, cascaded_importance_evolution.png
+
+================================================================================

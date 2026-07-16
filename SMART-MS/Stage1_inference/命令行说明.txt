@@ -1,0 +1,97 @@
+================================================================================
+  Stage1 Binary Classification Inference — Command Line Instructions (Windows)
+================================================================================
+
+[Path Conventions]
+  · The model directory defaults to the relative path from the repository root: SMART-MS\Stage1\output\
+    (consistent with the default .joblib output directory from Stage1 training.)
+  · When no MGF is specified on the command line, it attempts to read: dataset\input.mgf
+    (If this file does not exist, use --mgf to specify your MGF path.)
+  · All relative paths in command line arguments are relative to the "repository root directory"
+    (the level containing both dataset and SMART-MS folders), independent of drive letters
+    or local absolute paths.
+  · By default, a subfolder output\ is automatically created under SMART-MS\Stage1_inference\.
+    All three inference result CSVs are written to SMART-MS\Stage1_inference\output\.
+
+[Environment]
+  pip install pandas numpy joblib tqdm
+
+[Working Directory] Open a terminal at the repository root (you should see the dataset and SMART-MS folders).
+
+--------------------------------------------------------------------------------
+1) Run with Specified MGF (recommended: explicitly provide the spectrum file path)
+--------------------------------------------------------------------------------
+
+  CMD:
+
+    cd /d <repo_root>
+    python SMART-MS\Stage1_inference\main.py --mgf dataset\your_file.mgf
+
+  PowerShell:
+
+    Set-Location <repo_root>
+    python SMART-MS\Stage1_inference\main.py --mgf dataset\your_file.mgf
+
+  Replace <repo_root> with your actual project root path; replace "your_file.mgf" with the actual MGF filename.
+
+--------------------------------------------------------------------------------
+2) Use Default Model Directory and Default Output Directory (only change MGF)
+--------------------------------------------------------------------------------
+
+  python SMART-MS\Stage1_inference\main.py --mgf dataset\your_file.mgf
+
+  Note: Models are loaded from all .joblib files under SMART-MS\Stage1\output\ and prediction probabilities
+  are averaged; results are written to SMART-MS\Stage1_inference\output\.
+
+--------------------------------------------------------------------------------
+3) Explicitly Specify Model Directory (relative to repo root)
+--------------------------------------------------------------------------------
+
+  python SMART-MS\Stage1_inference\main.py ^
+    --mgf dataset\your_file.mgf ^
+    --models-dir SMART-MS\Stage1\output
+
+  PowerShell multi-line example:
+
+    python SMART-MS\Stage1_inference\main.py `
+      --mgf dataset\your_file.mgf `
+      --models-dir SMART-MS\Stage1\output
+
+--------------------------------------------------------------------------------
+4) Explicitly Specify Inference Result Output Directory (relative to repo root)
+--------------------------------------------------------------------------------
+
+  python SMART-MS\Stage1_inference\main.py ^
+    --mgf dataset\your_file.mgf ^
+    --output-dir SMART-MS\Stage1_inference\output
+
+--------------------------------------------------------------------------------
+5) Custom Output CSV Filenames (only change filenames; directory still determined by --output-dir, default output\)
+--------------------------------------------------------------------------------
+
+  python SMART-MS\Stage1_inference\main.py ^
+    --mgf dataset\your_file.mgf ^
+    --out-h Task1_H.csv ^
+    --out-fa Task1_FA.csv ^
+    --out-best Task1_Best.csv
+
+--------------------------------------------------------------------------------
+6) Optional Parameters Overview
+--------------------------------------------------------------------------------
+
+  --models-dir PATH   Directory containing .joblib models (default: SMART-MS\Stage1\output)
+  --mgf PATH          Input MGF file (default: dataset\input.mgf; must specify if file does not exist)
+  --output-dir PATH   Output directory for three CSVs (default: SMART-MS\Stage1_inference\output)
+  --out-h NAME        H hypothesis result CSV filename (default: Task1_inference_H_hypothesis_only.csv)
+  --out-fa NAME       FA hypothesis result CSV filename (default: Task1_inference_FA_hypothesis_only.csv)
+  --out-best NAME     Best match result CSV filename (default: Task1_inference_Best_Match_Final.csv)
+
+--------------------------------------------------------------------------------
+[Default Generated Files (all under SMART-MS\Stage1_inference\output\ unless --output-dir is changed)]
+--------------------------------------------------------------------------------
+
+  - Task1_inference_H_hypothesis_only.csv
+  - Task1_inference_FA_hypothesis_only.csv
+  - Task1_inference_Best_Match_Final.csv
+
+================================================================================
