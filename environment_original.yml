@@ -1,0 +1,36 @@
+# ================================================================================
+#   SMART-MS Original Experiment Environment Configuration
+#   (Original Experiment Environment — Conda Environment File)
+# ================================================================================
+#
+#   This environment file records the exact configuration of the conda virtual
+#   environment used in the original experiment (project-required libraries and
+#   their exact versions). Use this file to precisely reproduce the Python
+#   environment and dependency versions from the original experiment.
+#
+#   Environment name: smartms
+#
+#   Create environment:
+#       conda env create -f environment_original.yml
+#
+#   Activate environment:
+#       conda activate smartms
+#
+# ================================================================================
+
+name: smartms
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.18
+  - pip
+  - pip:
+    - pandas==2.3.2
+    - numpy==2.2.6
+    - lightgbm==4.6.0
+    - scikit-learn==1.7.2
+    - matplotlib==3.10.6
+    - seaborn==0.13.2
+    - joblib==1.5.2
+    - tqdm==4.67.1

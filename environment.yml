@@ -1,0 +1,38 @@
+# ================================================================================
+#   SMART-MS General Virtual Environment Configuration (Recommended)
+#   (General Environment — Conda Environment File)
+# ================================================================================
+#
+#   This environment file is suitable for most computers, using relaxed version
+#   constraints for better compatibility. It can fully reproduce the code's
+#   functionality. Recommended for most users.
+#
+#   Environment name: smartms
+#
+#   Create environment:
+#       conda env create -f environment.yml
+#
+#   Activate environment:
+#       conda activate smartms
+#
+#   To precisely reproduce the original experiment environment, use
+#   environment_original.yml instead.
+#
+# ================================================================================
+
+name: smartms
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.9,<3.12
+  - pip
+  - pip:
+    - pandas>=2.0
+    - numpy>=1.24
+    - lightgbm>=4.0
+    - scikit-learn>=1.3
+    - matplotlib>=3.7
+    - seaborn>=0.12
+    - joblib>=1.3
+    - tqdm>=4.65

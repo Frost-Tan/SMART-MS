@@ -1,0 +1,429 @@
+================================================================================
+  SMART-MS Complete Command Line Reference — Windows
+================================================================================
+
+  SMART-MS is a LightGBM-based saponin mass spectrometry identification tool
+  with two stages:
+    - Stage1: Binary classification model training & inference (detect saponins)
+    - Stage2: Cascaded model training & inference (classify saponin type,
+      predict total sugar count, and predict site-specific sugar counts)
+
+  The project contains four modules:
+    1. Stage1 Training           (SMART-MS\Stage1)
+    2. Stage1 Inference          (SMART-MS\Stage1_inference)
+    3. Stage2 Cascaded Training  (SMART-MS\Stage2)
+    4. Stage2 Cascaded Inference (SMART-MS\Stage2_inference)
+
+================================================================================
+  General Conventions
+================================================================================
+
+  [Path Conventions]
+    · All relative paths are relative to the "repository root directory"
+      (the level containing both the dataset and SMART-MS folders),
+      independent of drive letters or local absolute paths.
+
+  [Working Directory]
+    · Open a terminal at the repository root (you should see both the
+      dataset and SMART-MS folders).
+
+  [Conda Environment]
+    · Project uses the conda environment: smartms
+    · Activation command: conda activate smartms
+
+  [Environment Configuration]
+    This project provides two conda environment configuration files
+    (in the same directory as this document):
+      - environment.yml            General config (recommended), suitable for most computers
+      - environment_original.yml   Original experiment config, precisely reproduces the
+                                   Python environment and dependency versions from the experiment
+
+    Create environment:
+      conda env create -f environment.yml          # General config (recommended)
+      conda env create -f environment_original.yml # Original experiment config
+
+  [Pretrained Model Download]
+    Due to the large size of model files, they are published separately on
+    GitHub Release:
+      https://github.com/Frost-Tan/SMART-MS/releases/tag/v1_model
+
+    Download model.zip and extract it to the repository root directory,
+    ensuring model/ folder is at <repo_root>/model/
+    (contains Stage1_saved_models/ and Stage2_saved_models/ subfolders).
+    If you train models yourself, training scripts will automatically generate
+    model files under SMART-MS/Stage1/output/ and SMART-MS/Stage2/output/,
+    so manual download is not required.
+
+  [Dependency Installation (Manual)]
+    pip install pandas numpy lightgbm scikit-learn matplotlib seaborn joblib tqdm
+
+    Original experiment dependency versions:
+      pandas==2.3.2  numpy==2.2.6  lightgbm==4.6.0  scikit-learn==1.7.2
+      matplotlib==3.10.6  seaborn==0.13.2  joblib==1.5.2  tqdm==4.67.1
+
+
+================================================================================
+  I. Stage1 — Binary Classification Training
+================================================================================
+
+  [Module Location] SMART-MS\Stage1\
+  [Dataset]         Default: dataset\FINAL_task1_neg.csv
+  [Output]          Default: SMART-MS\Stage1\output\
+
+  [Dependencies]
+    pip install pandas numpy lightgbm scikit-learn matplotlib seaborn joblib tqdm
+
+  ------------------------------------------------------------------------------
+  1) Default Run
+  ------------------------------------------------------------------------------
+
+    CMD:
+      cd /d <repo_root>
+      python SMART-MS\Stage1\main.py
+
+    PowerShell:
+      Set-Location <repo_root>
+      python SMART-MS\Stage1\main.py
+
+    Replace <repo_root> with your actual repository root path.
+
+  ------------------------------------------------------------------------------
+  2) Explicitly Specify Data File
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage1\main.py --data dataset\FINAL_task1_neg.csv
+
+    CMD multi-line continuation example:
+      python SMART-MS\Stage1\main.py ^
+        --data dataset\FINAL_task1_neg.csv
+
+  ------------------------------------------------------------------------------
+  3) Explicitly Specify Output Directory
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage1\main.py ^
+      --data dataset\FINAL_task1_neg.csv ^
+      --output-dir SMART-MS\Stage1\output
+
+    Note: When --model-dir is not specified, models, reports, and images
+    are all written to --output-dir.
+
+  ------------------------------------------------------------------------------
+  4) Separately Specify Model Save Directory
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage1\main.py ^
+      --data dataset\FINAL_task1_neg.csv ^
+      --output-dir SMART-MS\Stage1\output ^
+      --model-dir SMART-MS\Stage1\output
+
+  ------------------------------------------------------------------------------
+  5) Optional Parameters
+  ------------------------------------------------------------------------------
+
+    --cv-folds N     Number of cross-validation folds (default: 5)
+    --seed N         Random seed (default: 42)
+
+    Example:
+      python SMART-MS\Stage1\main.py --cv-folds 5 --seed 42
+
+  ------------------------------------------------------------------------------
+  Default Generated Files (all under SMART-MS\Stage1\output\)
+  ------------------------------------------------------------------------------
+
+    - ROC_Curve_MH_Baseline.png
+    - Feature_Importance_MH_Baseline.png
+    - Saponin_MH_Baseline_Report.txt
+    - lgbm_mh_baseline_fold_1.joblib ... lgbm_mh_baseline_fold_5.joblib
+
+
+================================================================================
+  II. Stage1 Inference — Binary Classification Inference
+================================================================================
+
+  [Module Location]   SMART-MS\Stage1_inference\
+  [Model Directory]    Default: SMART-MS\Stage1\output\
+                      (consistent with Stage1 training .joblib output directory)
+  [Input MGF]          Default: dataset\input.mgf
+                      (if this file does not exist, use --mgf to specify)
+  [Output]             Default: SMART-MS\Stage1_inference\output\
+
+  [Dependencies]
+    pip install pandas numpy joblib tqdm
+
+  [Description]
+    Loads all .joblib files from the model directory, averages prediction
+    probabilities, and outputs three CSV result files.
+
+  ------------------------------------------------------------------------------
+  1) Run with Specified MGF (recommended)
+  ------------------------------------------------------------------------------
+
+    CMD:
+      cd /d <repo_root>
+      python SMART-MS\Stage1_inference\main.py --mgf dataset\your_file.mgf
+
+    PowerShell:
+      Set-Location <repo_root>
+      python SMART-MS\Stage1_inference\main.py --mgf dataset\your_file.mgf
+
+  ------------------------------------------------------------------------------
+  2) Use Default Model and Output Directories
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage1_inference\main.py --mgf dataset\your_file.mgf
+
+  ------------------------------------------------------------------------------
+  3) Explicitly Specify Model Directory
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage1_inference\main.py ^
+      --mgf dataset\your_file.mgf ^
+      --models-dir SMART-MS\Stage1\output
+
+    PowerShell multi-line:
+      python SMART-MS\Stage1_inference\main.py `
+        --mgf dataset\your_file.mgf `
+        --models-dir SMART-MS\Stage1\output
+
+  ------------------------------------------------------------------------------
+  4) Explicitly Specify Output Directory
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage1_inference\main.py ^
+      --mgf dataset\your_file.mgf ^
+      --output-dir SMART-MS\Stage1_inference\output
+
+  ------------------------------------------------------------------------------
+  5) Custom Output CSV Filenames
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage1_inference\main.py ^
+      --mgf dataset\your_file.mgf ^
+      --out-h Task1_H.csv ^
+      --out-fa Task1_FA.csv ^
+      --out-best Task1_Best.csv
+
+  ------------------------------------------------------------------------------
+  6) Optional Parameters Overview
+  ------------------------------------------------------------------------------
+
+    --models-dir PATH   .joblib model directory (default: SMART-MS\Stage1\output)
+    --mgf PATH          Input MGF file (default: dataset\input.mgf)
+    --output-dir PATH   Output directory for 3 CSVs (default: SMART-MS\Stage1_inference\output)
+    --out-h NAME        H hypothesis result CSV filename (default: Task1_inference_H_hypothesis_only.csv)
+    --out-fa NAME       FA hypothesis result CSV filename (default: Task1_inference_FA_hypothesis_only.csv)
+    --out-best NAME     Best match result CSV filename (default: Task1_inference_Best_Match_Final.csv)
+
+  ------------------------------------------------------------------------------
+  Default Generated Files (all under SMART-MS\Stage1_inference\output\)
+  ------------------------------------------------------------------------------
+
+    - Task1_inference_H_hypothesis_only.csv
+    - Task1_inference_FA_hypothesis_only.csv
+    - Task1_inference_Best_Match_Final.csv
+
+
+================================================================================
+  III. Stage2 — Cascaded Model Training
+================================================================================
+
+  [Module Location]   SMART-MS\Stage2\
+  [Dataset]            Default: dataset\FINAL_task2_neg.csv
+  [Output]             Default: SMART-MS\Stage2\output\
+
+  [Default Behavior]
+    Without any ablation flag, only "Strategy3_Full_Pipeline" (full cascade +
+    total sugar constrained decoding) is trained.
+    Results are located at: SMART-MS\Stage2\output\Strategy3_Full_Pipeline\
+
+  [Three Ablation Strategies]
+    Adding the --all-ablations flag trains strategies 1, 2, and 3 sequentially:
+      - Strategy1_Independent             -> SMART-MS\Stage2\output\Strategy1_Independent\
+      - Strategy2_Cascaded_NoConstraint   -> SMART-MS\Stage2\output\Strategy2_Cascaded_NoConstraint\
+      - Strategy3_Full_Pipeline           -> SMART-MS\Stage2\output\Strategy3_Full_Pipeline\
+    Additionally, ablation comparison files are generated at the output root:
+      - ablation_comparison_metrics.csv
+      - ablation_performance_bar.png
+      - ablation_overall_report.txt
+
+  [Dependencies]
+    pip install pandas numpy lightgbm scikit-learn matplotlib seaborn joblib tqdm
+
+  ------------------------------------------------------------------------------
+  1) Default Run (Strategy 3 only)
+  ------------------------------------------------------------------------------
+
+    CMD:
+      cd /d <repo_root>
+      python SMART-MS\Stage2\main.py
+
+    PowerShell:
+      Set-Location <repo_root>
+      python SMART-MS\Stage2\main.py
+
+  ------------------------------------------------------------------------------
+  2) Explicitly Specify Data File
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage2\main.py --data dataset\FINAL_task2_neg.csv
+
+  ------------------------------------------------------------------------------
+  3) Three Ablation Experiments (Strategies 1 + 2 + 3)
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage2\main.py --all-ablations
+
+    With custom data and output directory:
+      python SMART-MS\Stage2\main.py ^
+        --all-ablations ^
+        --data dataset\FINAL_task2_neg.csv ^
+        --output-dir SMART-MS\Stage2\output
+
+  ------------------------------------------------------------------------------
+  4) Explicitly Specify Output Root Directory
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage2\main.py --output-dir SMART-MS\Stage2\output
+
+  ------------------------------------------------------------------------------
+  5) Optional Parameters
+  ------------------------------------------------------------------------------
+
+    --outer-folds N    Number of outer StratifiedKFold folds (default: 10)
+    --inner-folds N    Number of inner cross_val_predict folds (default: 10)
+    --seed N           Random seed (default: 42)
+    --device cpu|gpu   LightGBM device (default: cpu; specify gpu if available)
+
+    GPU example:
+      python SMART-MS\Stage2\main.py --device gpu
+
+  ------------------------------------------------------------------------------
+  Default Generated Files (Strategy 3 alone, under output\Strategy3_Full_Pipeline\)
+  ------------------------------------------------------------------------------
+
+    - plot_confusion_matrix_type.png
+    - plot_overall_metrics.png
+    - model_performance_report.txt
+    - cv_prediction_detailed.csv
+    - cv_metrics_summary.csv
+    - le_type.joblib
+    - model_type_fold*.joblib, model_total_sugar_fold*.joblib, model_site_*_fold*.joblib
+    - Strategy 3 additionally includes: feature_importance_stage*.png, cascaded_importance_evolution.png
+
+
+================================================================================
+  IV. Stage2 Inference — Cascaded Inference
+================================================================================
+
+  [Module Location]   SMART-MS\Stage2_inference\
+  [Model Directory]    Default: SMART-MS\Stage2\output\Strategy3_Full_Pipeline\
+                      (if using Strategy 1 or 2 training results, point
+                       --model-dir to the corresponding Strategy*_ subfolder)
+  [Database]           Default: dataset\merged_saponin_named.csv
+                      (must contain exact_mass, type, and sugar site columns)
+  [Input MGF]          Default: dataset\input.mgf
+  [Output]             Default: SMART-MS\Stage2_inference\output\
+
+  [Description]
+    Loads le_type.joblib and all fold type/sugar/site models, runs inference
+    for both [M-H]- and [M+HCOO]- adduct modes, and outputs two CSV result files.
+
+  [Dependencies]
+    pip install pandas numpy lightgbm scikit-learn joblib tqdm
+
+  ------------------------------------------------------------------------------
+  1) Run with Specified MGF and Database (recommended)
+  ------------------------------------------------------------------------------
+
+    CMD:
+      cd /d <repo_root>
+      python SMART-MS\Stage2_inference\main.py --mgf dataset\your_file.mgf --db dataset\your_db.csv
+
+    PowerShell:
+      Set-Location <repo_root>
+      python SMART-MS\Stage2_inference\main.py --mgf dataset\your_file.mgf --db dataset\your_db.csv
+
+  ------------------------------------------------------------------------------
+  2) Use Default Model Directory (Strategy 3) and Default Output
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage2_inference\main.py --mgf dataset\your_file.mgf --db dataset\your_db.csv
+
+  ------------------------------------------------------------------------------
+  3) Explicitly Specify Model Directory (e.g., using Strategy 1 or 2)
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage2_inference\main.py ^
+      --mgf dataset\your_file.mgf ^
+      --db dataset\your_db.csv ^
+      --model-dir SMART-MS\Stage2\output\Strategy3_Full_Pipeline
+
+    PowerShell multi-line:
+      python SMART-MS\Stage2_inference\main.py `
+        --mgf dataset\your_file.mgf `
+        --db dataset\your_db.csv `
+        --model-dir SMART-MS\Stage2\output\Strategy3_Full_Pipeline
+
+  ------------------------------------------------------------------------------
+  4) Explicitly Specify Output Directory
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage2_inference\main.py ^
+      --mgf dataset\your_file.mgf ^
+      --db dataset\your_db.csv ^
+      --output-dir SMART-MS\Stage2_inference\output
+
+  ------------------------------------------------------------------------------
+  5) Custom Output CSV Filenames
+  ------------------------------------------------------------------------------
+
+    python SMART-MS\Stage2_inference\main.py ^
+      --mgf dataset\your_file.mgf ^
+      --db dataset\your_db.csv ^
+      --out-all Task2_all.csv ^
+      --out-matched Task2_matched.csv
+
+  ------------------------------------------------------------------------------
+  6) Optional Parameters Overview
+  ------------------------------------------------------------------------------
+
+    --model-dir PATH   Model directory (default: SMART-MS\Stage2\output\Strategy3_Full_Pipeline)
+    --mgf PATH         Input MGF (default: dataset\input.mgf)
+    --db PATH          Saponin database CSV (default: dataset\merged_saponin_named.csv)
+    --output-dir PATH  Output directory for both CSVs (default: SMART-MS\Stage2_inference\output)
+    --out-all NAME     Detailed results CSV filename (default: Task2_inference_results_detailed_final.csv)
+    --out-matched NAME Matched subset CSV filename (default: Task2_inference_results_matched_only.csv)
+    --outer-folds N    Number of ensemble folds, must match training (default: 10)
+
+  ------------------------------------------------------------------------------
+  Default Generated Files (all under SMART-MS\Stage2_inference\output\)
+  ------------------------------------------------------------------------------
+
+    - Task2_inference_results_detailed_final.csv
+    - Task2_inference_results_matched_only.csv
+
+
+================================================================================
+  Typical Workflow
+================================================================================
+
+    1. Activate environment
+       conda activate smartms
+
+    2. Navigate to repository root
+       cd /d <repo_root>
+
+    3. Train Stage1 binary classification model
+       python SMART-MS\Stage1\main.py
+
+    4. Train Stage2 cascaded model (default Strategy 3)
+       python SMART-MS\Stage2\main.py
+
+    5. Run Stage1 inference (screen saponin candidates)
+       python SMART-MS\Stage1_inference\main.py --mgf dataset\your_file.mgf
+
+    6. Run Stage2 inference (structural elucidation)
+       python SMART-MS\Stage2_inference\main.py --mgf dataset\your_file.mgf --db dataset\your_db.csv
+
+================================================================================
