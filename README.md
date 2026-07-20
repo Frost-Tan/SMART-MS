@@ -153,7 +153,7 @@ Download `model.zip` and extract it to the repository root directory, ensuring t
 
 ```bash
 conda activate smartms
-cd /d <repo_root>
+cd <repo_root>
 ```
 
 ### 2. Stage1 Training (Binary Classification Model)
