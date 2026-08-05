@@ -1,4 +1,4 @@
-# SMART-MS — Saponin Mass Spectrometry Analysis Toolkit
+# SMART-MS — Saponin Machine-learning Assisted Recognition and Topology for Mass Spectrometry
 
 SMART-MS is a LightGBM-based saponin identification and structural elucidation tool that employs a two-stage cascaded strategy for end-to-end analysis from raw mass spectrometry data to saponin structural annotation.
 
