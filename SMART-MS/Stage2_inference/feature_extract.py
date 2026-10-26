@@ -1,4 +1,4 @@
-"""Spectrum feature vector (consistent with the original Stage2_inference script, including adduct calibration)."""
+"""Spectrum features with training-aligned region intensities and adduct calibration."""
 from __future__ import annotations
 
 from typing import Any, Dict
@@ -39,6 +39,7 @@ def extract_advanced_features_from_spec(
     weighted_mean_mz = (
         np.sum(mz_array * int_array) / np.sum(int_array) if np.sum(int_array) > 0 else 0.0
     )
+    max_int_aglycone, max_int_sugar = 0.0, 0.0
 
     for mz, intensity in zip(mz_array, int_array):
         if 0 <= mz < max_mz:
@@ -48,13 +49,25 @@ def extract_advanced_features_from_spec(
             if 0 <= loss < max_loss:
                 idx = int(loss / loss_bin_size)
                 vec_loss[idx] = max(vec_loss[idx], float(intensity))
+        # Match Stage2 training: inclusive m/z bounds, base-peak-normalized intensity.
+        if 400 <= mz <= 500:
+            max_int_aglycone = max(max_int_aglycone, float(intensity))
+        if 130 <= mz <= 180:
+            max_int_sugar = max(max_int_sugar, float(intensity))
 
     return np.concatenate(
         [
             vec_spec,
             vec_loss,
             np.array(
-                [pmass_baseline, max_int_mz, weighted_mean_mz, n_peaks, 0.0, 0.0],
+                [
+                    pmass_baseline,
+                    max_int_mz,
+                    weighted_mean_mz,
+                    n_peaks,
+                    max_int_aglycone,
+                    max_int_sugar,
+                ],
                 dtype=np.float32,
             ),
         ]
